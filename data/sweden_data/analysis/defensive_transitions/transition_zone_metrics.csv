@@ -1,0 +1,10 @@
+zone,time_to_attack_mean,time_to_attack_count,vert_progression_mean,progression_speed_mean,zone_x,zone_y
+Attacking Third - Center,3.0113999999999996,95,-9.25263157894737,-2.010142596657596,Attacking Third,Center
+Attacking Third - Left,3.6306969696969698,66,-6.454545454545454,-1.7223416392548425,Attacking Third,Left
+Attacking Third - Right,3.1672844827586206,116,-3.9741379310344827,-0.507485788719337,Attacking Third,Right
+Defensive Third - Center,3.4196833333333334,60,6.85,19.762587924013637,Defensive Third,Center
+Defensive Third - Left,3.1889148936170213,47,8.404255319148936,5.156306090851074,Defensive Third,Left
+Defensive Third - Right,3.496315789473684,38,7.7105263157894735,2.3067086247106867,Defensive Third,Right
+Middle Third - Center,3.53125,72,-1.4583333333333333,-0.1343280397145347,Middle Third,Center
+Middle Third - Left,3.252157894736842,114,-4.5701754385964914,-1.646831609238073,Middle Third,Left
+Middle Third - Right,3.823909638554217,166,-0.42771084337349397,-0.41314079147419736,Middle Third,Right

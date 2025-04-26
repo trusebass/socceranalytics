@@ -1,0 +1,19 @@
+match_id,match_date,opponent,sweden_status,zone,opponent_passes,sweden_defensive_actions,ppda
+5674984,2025-02-25,Wales,Away,defensive_third,34,56,0.6071428571428571
+5674984,2025-02-25,Wales,Away,middle_third,114,121,0.9421487603305785
+5674984,2025-02-25,Wales,Away,attacking_third,116,87,1.3333333333333333
+5574544,2024-05-31,Republic of Ireland,Away,defensive_third,37,96,0.3854166666666667
+5574544,2024-05-31,Republic of Ireland,Away,middle_third,101,116,0.8706896551724138
+5574544,2024-05-31,Republic of Ireland,Away,attacking_third,132,83,1.5903614457831325
+5574528,2024-04-05,England,Away,defensive_third,112,83,1.3493975903614457
+5574528,2024-04-05,England,Away,middle_third,287,134,2.1417910447761193
+5574528,2024-04-05,England,Away,attacking_third,193,68,2.838235294117647
+5674976,2025-02-21,Denmark,Away,defensive_third,92,71,1.295774647887324
+5674976,2025-02-21,Denmark,Away,middle_third,223,123,1.8130081300813008
+5674976,2025-02-21,Denmark,Away,attacking_third,230,97,2.3711340206185567
+5674994,2025-04-04,Italy,Home,defensive_third,59,51,1.1568627450980393
+5674994,2025-04-04,Italy,Home,middle_third,136,92,1.4782608695652173
+5674994,2025-04-04,Italy,Home,attacking_third,162,78,2.076923076923077
+5574551,2024-06-04,Republic of Ireland,Home,defensive_third,34,46,0.7391304347826086
+5574551,2024-06-04,Republic of Ireland,Home,middle_third,94,100,0.94
+5574551,2024-06-04,Republic of Ireland,Home,attacking_third,61,72,0.8472222222222222
