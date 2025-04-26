@@ -646,7 +646,7 @@ def visualize_ppda_metrics(defensive_df: pd.DataFrame, zones_df: pd.DataFrame, t
         plt.savefig(OUTPUT_DIR / f"ppda_timeline_{match_id}.png", dpi=300, bbox_inches='tight')
         plt.close()
     
-    # 5. PPDA heatmap by zone
+    # 5. PPDA heatmap by zone - standard heatmap
     # Calculate average PPDA by zone for each opponent
     zones_avg = zones_df.groupby(['opponent', 'zone'])['ppda'].mean().reset_index()
     zones_avg_pivot = zones_avg.pivot(index='opponent', columns='zone', values='ppda')
@@ -668,6 +668,229 @@ def visualize_ppda_metrics(defensive_df: pd.DataFrame, zones_df: pd.DataFrame, t
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "ppda_zone_heatmap.png", dpi=300, bbox_inches='tight')
     plt.close()
+    
+    # 5b. PPDA zone heatmap on a soccer field
+    # Setup the pitch visualization
+    pitch = Pitch(pitch_type='wyscout', pitch_color='#f4f4f4', line_color='#222222',
+                 stripe_color='#f9f9f9', goal_type='box')
+    
+    # Zone coordinates on the pitch
+    zone_coords = {
+        'defensive_third': (16.5, 50),  # x, y center of defensive third
+        'middle_third': (50, 50),       # x, y center of middle third
+        'attacking_third': (83.5, 50)   # x, y center of attacking third
+    }
+    
+    # Calculate average PPDA across all opponents for each zone
+    avg_ppda_by_zone = zones_df.groupby('zone')['ppda'].mean().reset_index()
+    avg_ppda_by_zone_dict = dict(zip(avg_ppda_by_zone['zone'], avg_ppda_by_zone['ppda']))
+    
+    # Prepare color normalization
+    vmin = avg_ppda_by_zone['ppda'].min()
+    vmax = avg_ppda_by_zone['ppda'].max()
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    cmap = plt.cm.YlOrRd  # Yellow to Red colormap
+    
+    # Create the visualization
+    fig, ax = plt.subplots(figsize=(16, 12))
+    pitch.draw(ax=ax)
+    
+    # Add zone rectangles with PPDA values
+    for zone, (x_center, y_center) in zone_coords.items():
+        ppda_value = avg_ppda_by_zone_dict.get(zone, 0)
+        
+        # Define rectangle dimensions
+        if zone == 'defensive_third':
+            rect_width = 33.3
+            rect_x = 0
+        elif zone == 'middle_third':
+            rect_width = 33.3
+            rect_x = 33.3
+        else:  # attacking_third
+            rect_width = 33.4
+            rect_x = 66.6
+        
+        rect_height = 100
+        rect_y = 0
+        
+        # Create rectangle with color based on PPDA
+        rect = plt.Rectangle(
+            (rect_x, rect_y),
+            rect_width,
+            rect_height,
+            facecolor=cmap(norm(ppda_value)),
+            alpha=0.7,
+            edgecolor='black',
+            zorder=1
+        )
+        ax.add_patch(rect)
+        
+        # Add text with PPDA value
+        ax.text(
+            x_center,
+            50,  # Middle of the zone
+            f'{ppda_value:.2f}',
+            ha='center',
+            va='center',
+            fontsize=16,
+            fontweight='bold',
+            color='black',
+            zorder=2,
+            bbox=dict(boxstyle="round,pad=0.3", fc='white', alpha=0.7)
+        )
+        
+        # Add zone label
+        zone_name = zone.replace('_', ' ').title()
+        ax.text(
+            x_center,
+            10,  # Near the bottom
+            zone_name,
+            ha='center',
+            va='center',
+            fontsize=12,
+            fontweight='bold',
+            color='black',
+            zorder=2
+        )
+    
+    # Add a colorbar
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax)
+    cbar.set_label('Average PPDA (lower = more intense pressing)', fontsize=14)
+    
+    # Add title
+    ax.set_title("Sweden's Average PPDA by Zone", fontsize=20, fontweight='bold')
+    
+    # Add explanation
+    ax.annotate(
+        'Lower PPDA indicates more intense pressing in that zone',
+        xy=(0.5, 0.05),
+        xycoords='figure fraction',
+        ha='center',
+        va='bottom',
+        fontsize=14,
+        fontweight='bold',
+        bbox=dict(boxstyle="round,pad=0.5", fc='white', ec='black', alpha=0.8)
+    )
+    
+    # Save figure
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / "ppda_zone_field_heatmap.png", dpi=400, bbox_inches='tight')
+    plt.close()
+    
+    # Create opponent-specific pitch visualizations for PPDA by zone
+    # Create a directory for these visualizations if it doesn't exist
+    opponent_viz_dir = OUTPUT_DIR / "opponent_zone_comparisons"
+    os.makedirs(opponent_viz_dir, exist_ok=True)
+    
+    # Get unique opponents
+    unique_opponents = zones_df['opponent'].unique()
+    
+    for opponent in unique_opponents:
+        # Get data for this opponent
+        opponent_data = zones_df[zones_df['opponent'] == opponent]
+        # Use pivot_table instead of pivot to handle duplicate entries by taking the mean
+        opponent_pivot = opponent_data.pivot_table(index='opponent', columns='zone', values='ppda', aggfunc='mean')
+        
+        # Setup the visualization
+        fig, ax = plt.subplots(figsize=(16, 12))
+        pitch.draw(ax=ax)
+        
+        # Determine color normalization for this opponent
+        opponent_min = opponent_data['ppda'].min()
+        opponent_max = opponent_data['ppda'].max()
+        opponent_norm = plt.Normalize(vmin=opponent_min, vmax=opponent_max)
+        
+        # Draw zones
+        for zone, (x_center, y_center) in zone_coords.items():
+            # Get PPDA value for this zone
+            try:
+                ppda_value = opponent_pivot.at[opponent, zone]
+                
+                # Define rectangle dimensions
+                if zone == 'defensive_third':
+                    rect_width = 33.3
+                    rect_x = 0
+                elif zone == 'middle_third':
+                    rect_width = 33.3
+                    rect_x = 33.3
+                else:  # attacking_third
+                    rect_width = 33.4
+                    rect_x = 66.6
+                
+                rect_height = 100
+                rect_y = 0
+                
+                # Create rectangle
+                rect = plt.Rectangle(
+                    (rect_x, rect_y),
+                    rect_width,
+                    rect_height,
+                    facecolor=cmap(opponent_norm(ppda_value)),
+                    alpha=0.7,
+                    edgecolor='black',
+                    zorder=1
+                )
+                ax.add_patch(rect)
+                
+                # Add text with PPDA value
+                ax.text(
+                    x_center,
+                    50,  # Middle of the zone
+                    f'{ppda_value:.2f}',
+                    ha='center',
+                    va='center',
+                    fontsize=16,
+                    fontweight='bold',
+                    color='black',
+                    zorder=2,
+                    bbox=dict(boxstyle="round,pad=0.3", fc='white', alpha=0.7)
+                )
+                
+                # Add zone label
+                zone_name = zone.replace('_', ' ').title()
+                ax.text(
+                    x_center,
+                    10,  # Near the bottom
+                    zone_name,
+                    ha='center',
+                    va='center',
+                    fontsize=12,
+                    fontweight='bold',
+                    color='black',
+                    zorder=2
+                )
+            except (KeyError, ValueError) as e:
+                print(f"Missing data for {opponent} in {zone}: {e}")
+        
+        # Add a colorbar
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=opponent_norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax)
+        cbar.set_label('PPDA (lower = more intense pressing)', fontsize=14)
+        
+        # Add title
+        ax.set_title(f"Sweden's PPDA Analysis vs {opponent}", fontsize=20, fontweight='bold')
+        
+        # Add explanation
+        match_date = opponent_data['match_date'].iloc[0] if not opponent_data.empty else "Unknown date"
+        ax.annotate(
+            f'Match date: {match_date}\nLower PPDA indicates more intense pressing in that zone',
+            xy=(0.5, 0.05),
+            xycoords='figure fraction',
+            ha='center',
+            va='bottom',
+            fontsize=14,
+            fontweight='bold',
+            bbox=dict(boxstyle="round,pad=0.5", fc='white', ec='black', alpha=0.8)
+        )
+        
+        # Save figure
+        plt.tight_layout()
+        opponent_name_safe = opponent.replace(" ", "_").lower()
+        plt.savefig(opponent_viz_dir / f"ppda_zones_{opponent_name_safe}.png", dpi=400, bbox_inches='tight')
+        plt.close()
     
     # 6. PPDA vs Opponent Passes scatter plot
     plt.figure(figsize=(12, 8))
@@ -862,8 +1085,7 @@ def visualize_pressing_zones(heatmap_data_list):
             ax.annotate('PPDA: Opponent Passes ÷ Sweden Defensive Actions\nLower PPDA = More intense pressing', 
                       xy=(0.5, 0.02), xycoords='figure fraction', 
                       ha='center', va='bottom', fontsize=10, fontweight='bold',
-                      bbox=dict(boxstyle="round,pad=0.3", fc=SWEDEN_COLORS['background'], 
-                              ec=SWEDEN_COLORS['text'], alpha=0.7))
+                      bbox=dict(boxstyle="round,pad=0.3", fc='white', ec='black', alpha=0.7))
             
             plt.tight_layout()
             plt.savefig(pitch_viz_dir / f"pass_press_map_{match_id}.png", dpi=300, bbox_inches='tight')
@@ -919,7 +1141,7 @@ def visualize_pressing_zones(heatmap_data_list):
         ax.text(83.5, 5, "Attacking Third", color='white', fontsize=12, ha='center', fontweight='bold')
         
         # Add a title and colorbar
-        ax.set_title(f"Sweden's Average Pressing Intensity Across All Matches\nAverage PPDA: {avg_ppda:.2f}", 
+        ax.set_title(f"Sweden's Pressing Intensity Across All Matches\nAverage PPDA: {avg_ppda:.2f}", 
                    fontsize=20, fontweight='bold')
         
         cbar = plt.colorbar(contour, ax=ax)

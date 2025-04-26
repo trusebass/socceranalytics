@@ -1,6 +1,12 @@
 #Data to be excluded
 /data/
 /soanalenv/
+README_project.md
+
+# Exclude everything in data directory
+/data/*
+# But include this specific subfolder
+!/data/sweden_data/analysis/
 
 # Python
 __pycache__/
