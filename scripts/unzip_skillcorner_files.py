@@ -27,6 +27,7 @@ for file in files:
             
 # Alternative approach using pathlib for better readability and efficiency
 
+'''
 FILES_PATH = Path(FILES_PATH)
 
 for file in FILES_PATH.iterdir():
@@ -36,3 +37,5 @@ for file in FILES_PATH.iterdir():
             extract_path = FILES_PATH / file.stem
             zipref.extractall(extract_path)
         file.unlink()  # Remove the zip file after extraction
+        
+'''
